@@ -1,0 +1,41 @@
+#define PIN_LED 7
+long int LED_OFF_TIME, LED_ON_TIME;
+long int T; 
+
+void set_period(int period) {  // period: 100 to 10000 (unit: us)
+  T = period;
+  LED_ON_TIME = 0;
+  LED_OFF_TIME = T;
+}
+
+void set_duty(int duty) { // duty: 0 to 100 (unit: %)
+  LED_ON_TIME = int((duty * T)/T);
+  LED_OFF_TIME = T - LED_ON_TIME;
+}
+
+
+void setup() {
+  // put your setup code here, to run once:
+  pinMode(PIN_LED, OUTPUT);
+  set_period(1000);
+  
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+  for(int i=0;i<T+1;i++){
+    set_duty(i);
+    digitalWrite(PIN_LED, HIGH);
+    delayMicroseconds(LED_OFF_TIME);
+    digitalWrite(PIN_LED, LOW);
+    delayMicroseconds(LED_ON_TIME);
+  }
+  
+  for(int i=T;i>0;i--){
+    set_duty(i);
+    digitalWrite(PIN_LED, HIGH);
+    delayMicroseconds(LED_OFF_TIME);
+    digitalWrite(PIN_LED, LOW);
+    delayMicroseconds(LED_ON_TIME);
+  }
+}
