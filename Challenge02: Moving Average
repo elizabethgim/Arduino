@@ -10,7 +10,7 @@
 #define _DIST_MAX 300 // maximum distance to be measured (unit: mm)
 #define _DIST_ALPHA 0.3 // EMA weight of new sample (range: 0 to 1). Setting this value to 1 effectively disables EMA filter.
 
-#define N 30 // number of sample
+#define N 3 // number of sample
 
 // global variables
 float timeout; // unit: us
@@ -51,25 +51,16 @@ void loop() {
 
 // get a distance reading from the USS
   dist_raw = USS_measure(PIN_TRIG,PIN_ECHO);
-  int sum = 0;
+  int temp = 0;
   mid[i] = dist_raw;
   i++;
   if(i == N){
     i = 0;
-    for(int j=0;j<3;j++){
-      sum += mid[j];
-    }
-    median = sum / N;
+    median = mid[N/2+1];
   }
+  
   if(dist_raw == 0) dist_raw = median;
-/*  
-  Serial.print("mid:");
-  Serial.print(mid[0]);
-  Serial.print(", ");
-  Serial.print(mid[1]);
-  Serial.print(", ");
-  Serial.println(mid[2]);
-*/
+
 
 // output the read value to the serial port
   Serial.print("Min:0, ");
