@@ -20,7 +20,7 @@ float scale; // used for pulse duration to distance conversion
 
 float mid[N]; //sample
 float median;
-int i = 0; //interator
+int i = 0;
 
 void setup() {
 // initialize GPIO pins
