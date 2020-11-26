@@ -1,0 +1,100 @@
+#include <Servo.h>
+
+//Arduino pin assignment
+#define PIN_LED 9
+#define PIN_SERVO 10
+#define PIN_IR A0
+
+//Servo range
+#define _DUTY_MIN 1410 //Rail moving up
+#define _DUTY_NEU 1510
+#define _DUTY_MAX 1610 // Rail moving down
+
+//Framework setting
+#define _DIST_TARGET 255 
+#define _DIST_MIN 90
+#define _DIST_MAX 410
+
+//PID parameters
+#define _KP 0.6
+
+#define _DIST_ALPHA 0.5 // EMA weight of new sample (range: 0 to 1). Setting this value to 1 effectively disables EMA filter.
+
+Servo myservo;
+
+int a, b; // unit: mm , for dist_cali
+
+//Distance sensor
+float dist_target;
+float dist_raw, dist_ema, dist_cali, alpha;
+
+//Servo speed control
+int duty_target, duty_curr;
+
+//PID variables
+float control, error_curr, error_prev, pterm, dterm, iterm;
+
+//fillter
+
+void setup() {
+  // put your setup code here, to run once:
+  myservo.attach(PIN_SERVO);
+  myservo.writeMicroseconds(_DUTY_NEU);
+  duty_curr = _DUTY_NEU;
+  Serial.begin(57600);
+
+  //initialize global variables
+  a = 69;
+  b = 340;
+  dist_target = _DIST_TARGET;
+  dist_raw = 0.0;
+  alpha = _DIST_ALPHA;
+
+}
+
+
+void loop() {
+  // put your main code here, to run repeatedly:
+  dist_raw = ir_distance();
+  dist_cali = _DIST_MIN + 300.0 / (246-79) * (dist_raw - 79); //filltering
+  dist_ema = ir_distance_filtered();
+
+  //PID control
+  error_curr = dist_target - dist_cali;
+  pterm = _KP * error_curr;
+  
+/*  iterm += error_curr;
+  dterm = (error_curr - error_prev)/;*/
+
+  control = pterm;
+  
+  duty_target = _DUTY_NEU + control;
+  myservo.writeMicroseconds(duty_target);
+  delay(50);
+
+      Serial.print("dist_ir:");
+      Serial.print(dist_raw);
+      Serial.print(",pterm:");
+      Serial.print(map(pterm,-1000,1000,510,610));
+      Serial.print(",duty_target:");
+      Serial.print(map(duty_target,1000,2000,410,510));
+      Serial.print(",duty_curr:");
+      Serial.print(map(duty_curr,1000,2000,410,510));
+      Serial.println(",Min:100,Low:200,dist_target:255,High:310,Max:410");
+}
+
+
+//ir sensor reading value
+float ir_distance(void){ // return value unit: mm
+  float val;
+  float volt = float(analogRead(PIN_IR));
+  val = ((6762.0/(volt-9.0))-4.0) * 10.0;
+  if(val < _DIST_MIN || val > _DIST_MAX) return;
+  return val;
+}
+
+float ir_distance_filtered(void){
+  dist_ema = alpha * dist_cali+(1-alpha)*dist_ema;
+  
+  return dist_ema;
+}
