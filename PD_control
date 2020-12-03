@@ -95,7 +95,7 @@ float ir_distance(void){ // return value unit: mm
   float volt = float(analogRead(PIN_IR));
   val = ((6762.0/(volt-9.0))-4.0) * 10.0;
   if(val < _DIST_MIN || val > _DIST_MAX) return;
-  return _DIST_MIN + 300.0 / (b-a) * (val - a);
+  return (-0.0009*val*val+1.4943*val-12.573);
 }
 
 #define _INTERVAL_DIST 20  // DELAY_MICROS * samples_num^2 의 값이 최종 거리측정 인터벌임. 넉넉하게 30ms 잡음.
