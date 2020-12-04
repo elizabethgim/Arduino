@@ -20,8 +20,8 @@
 #define _DIST_MAX 410
 
 //PID parameters
-#define _KP 0.0
-#define _KD 60.0
+#define _KP 2.0
+#define _KD 140.0
 
 #define _DIST_ALPHA 0.1 // EMA weight of new sample (range: 0 to 1). Setting this value to 1 effectively disables EMA filter.
 
